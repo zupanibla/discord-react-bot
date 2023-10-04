@@ -137,10 +137,9 @@ client.on('interactionCreate', async interaction => {
             }
 
             await targetMessage.react(emoji.toString());
-            const messageLink2 = `https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${targetMessage.id}`;
-            const replyContent = `Reacted to ${messageLink2} with ${emoji.toString()}!`;
-
-            await interaction.reply({ content: replyContent, ephemeral: true });
+            
+            await interaction.deferReply({ ephemeral: true });
+            await interaction.deleteReply();
         } catch (e) {
             console.log(e);
             await interaction.reply({ content: `Couldn't react to the message!`, ephemeral: true });
@@ -221,3 +220,5 @@ client.on('messageReactionAdd', async (reaction, user) => {
 client.login(discordBotApiToken);
 
 console.log('Started!');
+
+// TODO remove useless success messages.
