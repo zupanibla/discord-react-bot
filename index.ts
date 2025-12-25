@@ -1,4 +1,4 @@
-import { Client, Emoji, GatewayIntentBits, Partials, REST, Routes, SlashCommandBuilder } from 'discord.js';
+import { Client, Emoji, GatewayIntentBits, Partials, REST, Routes, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 // Args
 if (process.argv.length < 3) {
@@ -17,6 +17,7 @@ const client  = new Client({
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.GuildEmojisAndStickers,
     ],
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
@@ -94,23 +95,17 @@ client.on('interactionCreate', async interaction => {
     // React command.
     if (interaction.commandName === 'react') {
         //@ts-ignore
-        const emojiName = interaction.options.getString('emoji_name');
+        const emojiNameInput = interaction.options.getString('emoji_name', true);
 
         // Find the emoji by its name across all the bot's guilds.
-        let emoji: Emoji | undefined;
-        for (const guild of interaction.client.guilds.cache.values()) {
-            const foundEmoji = guild.emojis.cache.find(e => e.name?.toLowerCase() === emojiName.toLowerCase());
-            if (foundEmoji) {
-                emoji = foundEmoji;
-                break;
-            }
-        }
+        const emoji = getAllAvailableEmojis().find(e => 
+            e.name?.toLowerCase() === emojiNameInput.toLowerCase()
+        );
 
         if (!emoji) {
-            await interaction.reply({ content: `Couldn't find the specified emoji in any of the servers I'm in.`, ephemeral: true });
+            await interaction.reply({ content: `Couldn't find the specified emoji in any of the servers I'm in.`, flags: [MessageFlags.Ephemeral] });
             return;
         }
-
 
         try {
             let targetMessage;
@@ -132,17 +127,18 @@ client.on('interactionCreate', async interaction => {
             }
 
             if (!targetMessage) {
-                await interaction.reply({ content: `No target message found to react to.`, ephemeral: true });
+                await interaction.reply({ content: `No target message found to react to.`, flags: [MessageFlags.Ephemeral] });
                 return;
             }
-
-            await targetMessage.react(emoji.toString());
             
-            await interaction.deferReply({ ephemeral: true });
+            console.log(`Reacting to message ID ${targetMessage.id} with emoji ${emoji.identifier}`);
+            await targetMessage.react(emoji.identifier);
+
+            await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
             await interaction.deleteReply();
         } catch (e) {
             console.log(e);
-            await interaction.reply({ content: `Couldn't react to the message!`, ephemeral: true });
+            await interaction.reply({ content: `Couldn't react to the message!`, flags: [MessageFlags.Ephemeral] });
             return;
         }
     }
@@ -159,18 +155,18 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.reply({
             content: `Here's a list of all the emojis I can use:`,
-            ephemeral: true
+            flags: [MessageFlags.Ephemeral]
         });
 
         for (const it of chunkMessage(allEmojiNamesString, ' ')) {
-            await interaction.followUp({ content: it, ephemeral: true });
+            await interaction.followUp({ content: it, flags: [MessageFlags.Ephemeral] });
         }
 
         return;
     }
 });
 
-client.once('ready', async () => {
+client.once('clientReady', async () => {
     console.log('Bot is online!');
 
     const commands = [
@@ -220,5 +216,3 @@ client.on('messageReactionAdd', async (reaction, user) => {
 client.login(discordBotApiToken);
 
 console.log('Started!');
-
-// TODO remove useless success messages.
