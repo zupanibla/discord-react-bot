@@ -38,17 +38,17 @@ function stringDistance(a: string, b: string) {
     const M: number[][] = new Array(a.length + 1).fill(0).map(() => new Array(b.length + 1).fill(-1));
     const MIsInsert: boolean[][] = new Array(a.length + 1).fill(0).map(() => new Array(b.length + 1).fill(false));
 
-    function f(i: number, j: number) {
+    function f(i: number, j: number): number {
         if (M[i][j] !== -1) return M[i][j];
 
-        const ret = (() => {
+        const ret: number = (() => {
             if (j == b.length) return 0.01 * (a.length - i);
             if (i == a.length) return 1 * (b.length - j);
 
             const matchCost = a[i] == b[j] ? f(i + 1, j + 1) : Infinity;
             const replaceCost = f(i + 1, j + 1) + 1;
             const deleteCost = f(i, j + 1) + 1;
-            const insertCost = f(i + 1, j) + (MIsInsert[i + 1][j] ? 0 : 1);
+            const insertCost: number = f(i + 1, j) + (MIsInsert[i + 1][j] ? 0 : 1);
 
             const min = Math.min(matchCost, replaceCost, deleteCost, insertCost);
 
