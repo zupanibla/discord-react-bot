@@ -29,12 +29,17 @@ cd discord-react-bot
 npm install
 ```
 
-**3. Run**
+**3. Create a `.env` file**
 ```bash
-node node_modules/.bin/tsx index.ts <bot token>
+echo 'DISCORD_TOKEN=your_token_here' > .env
 ```
 
-- `bot token` — your Discord bot token from the [Developer Portal](https://discord.com/developers/applications)
+Get your token from the [Discord Developer Portal](https://discord.com/developers/applications).
+
+**4. Run**
+```bash
+node node_modules/.bin/tsx index.ts
+```
 
 ## Commands
 

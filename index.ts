@@ -1,12 +1,11 @@
 import { Client, Emoji, GatewayIntentBits, Partials, REST, Routes, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
-// Args
-if (process.argv.length < 3) {
-    console.log('Usage: npx node-ts index.ts <discord bot api token>');
+const discordBotApiToken = process.env.DISCORD_TOKEN;
+
+if (!discordBotApiToken) {
+    console.error('DISCORD_TOKEN environment variable is not set.');
     process.exit(1);
 }
-
-const discordBotApiToken = process.argv[2];
 
 // Instantiate Discord client ('MESSAGE', 'CHANNEL', 'REACTION' partials needed for global reaction listening).
 const client  = new Client({
